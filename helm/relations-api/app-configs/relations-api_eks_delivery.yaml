@@ -2,6 +2,5 @@
 replicaCount: 2
 service:
   name: relations-api
-eksCluster: true
 env:
   app_port: "8080"
