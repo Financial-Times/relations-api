@@ -246,8 +246,6 @@ func cleanDB(t testing.TB, conn neoutils.NeoConnection, data []payloadData) {
 		qs[i] = &neoism.CypherQuery{
 			Statement: fmt.Sprintf(`
 			MATCH (a:Thing {uuid: "%s"})
-			OPTIONAL MATCH (a)<-[iden:IDENTIFIES]-(i:Identifier)
-			DELETE iden, i
 			DETACH DELETE a`, d.uuid)}
 	}
 	err := conn.CypherBatch(qs)
