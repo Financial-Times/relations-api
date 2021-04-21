@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Financial-Times/api-endpoint"
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	logger "github.com/Financial-Times/go-logger"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
@@ -42,18 +43,24 @@ func main() {
 		Desc:   "Duration Get requests should be cached for. e.g. 2h45m would set the max-age value to '7440' seconds",
 		EnvVar: "CACHE_DURATION",
 	})
+	apiYml := app.String(cli.StringOpt{
+		Name:   "api-yml",
+		Value:  "./api.yml",
+		Desc:   "Location of the API Swagger YML file.",
+		EnvVar: "API_YML",
+	})
 
 	logger.InitDefaultLogger(serviceName)
 
 	app.Action = func() {
 		logger.Infof("relations-api will listen on port: %s, connecting to: %s", *port, *neoURL)
-		runServer(*neoURL, *port, *cacheDuration)
+		runServer(*neoURL, *port, *cacheDuration, apiYml)
 	}
 	logger.Infof("Application started with args %s", os.Args)
 	app.Run(os.Args)
 }
 
-func runServer(neoURL string, port string, cacheDuration string) {
+func runServer(neoURL string, port string, cacheDuration string, apiYml *string) {
 	var cacheControlHeader string
 	if duration, durationErr := time.ParseDuration(cacheDuration); durationErr != nil {
 		logger.Fatalf("Failed to parse cache duration string, %v", durationErr)
@@ -98,18 +105,23 @@ func runServer(neoURL string, port string, cacheDuration string) {
 	http.HandleFunc(status.BuildInfoPathDW, status.BuildInfoHandler)
 	http.HandleFunc("/__gtg", status.NewGoodToGoHandler(httpHandlers.GTG))
 
-	http.Handle("/", router(httpHandlers))
+	http.Handle("/", router(httpHandlers, apiYml))
 
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		logger.Fatalf("Unable to start server: %v", err)
 	}
 }
 
-func router(hh relations.HttpHandlers) http.Handler {
+func router(hh relations.HttpHandlers, apiYml *string) http.Handler {
 	servicesRouter := mux.NewRouter()
 
 	servicesRouter.HandleFunc("/content/{uuid}/relations", hh.GetContentRelations).Methods("GET")
 	servicesRouter.HandleFunc("/contentcollection/{uuid}/relations", hh.GetContentCollectionRelations).Methods("GET")
+	if apiYml != nil {
+		if endpoint, err := api.NewAPIEndpointForFile(*apiYml); err == nil {
+			servicesRouter.HandleFunc(api.DefaultPath, endpoint.ServeHTTP).Methods("GET")
+		}
+	}
 
 	var monitoringRouter http.Handler = servicesRouter
 	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(logger.Logger(), monitoringRouter)

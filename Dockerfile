@@ -22,6 +22,7 @@ RUN VERSION="version=$(git describe --tag --always 2> /dev/null)" \
 # Multi-stage build - copy only the certs and the binary into the image
 FROM scratch
 WORKDIR /
+COPY ./api/api.yml /
 COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=0 /artifacts/* /
 

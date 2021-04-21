@@ -3,7 +3,7 @@ module github.com/Financial-Times/relations-api/v3
 go 1.13
 
 require (
-	github.com/Financial-Times/api-endpoint v0.0.0-20170612095945-d9f326a291cc // indirect
+	github.com/Financial-Times/api-endpoint v0.0.0-20170612095945-d9f326a291cc
 	github.com/Financial-Times/base-ft-rw-app-go v0.0.0-20171010162315-74eab27b0c6d
 	github.com/Financial-Times/content-collection-rw-neo4j v0.0.0-20170322121701-b3ba6c46f8d7
 	github.com/Financial-Times/content-rw-neo4j v1.0.3-0.20180613151118-5543bceb064c
