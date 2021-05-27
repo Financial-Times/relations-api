@@ -3,7 +3,7 @@ module github.com/Financial-Times/relations-api/v3
 go 1.13
 
 require (
-	github.com/Financial-Times/api-endpoint v0.0.0-20170612095945-d9f326a291cc // indirect
+	github.com/Financial-Times/api-endpoint v1.0.0
 	github.com/Financial-Times/base-ft-rw-app-go v0.0.0-20171010162315-74eab27b0c6d
 	github.com/Financial-Times/content-collection-rw-neo4j v0.0.0-20170322121701-b3ba6c46f8d7
 	github.com/Financial-Times/content-rw-neo4j v1.0.3-0.20180613151118-5543bceb064c
@@ -19,7 +19,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.4.1-0.20170830053917-a659b61323b0
-	github.com/hashicorp/go-version v1.1.0 // indirect
 	github.com/jawher/mow.cli v1.0.4
 	github.com/jmcvetta/neoism v1.3.1
 	github.com/jmcvetta/randutil v0.0.0-20150817122601-2bb1b664bcff // indirect
@@ -30,7 +29,7 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.0.4-0.20170822132746-89742aefa4b2 // indirect
 	github.com/stretchr/objx v0.1.1 // indirect
-	github.com/stretchr/testify v1.3.0
+	github.com/stretchr/testify v1.5.1
 	go4.org v0.0.0-20181109185143-00e24f1b2599 // indirect
 	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc // indirect
 	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect

@@ -1,0 +1,194 @@
+openapi: 3.0.0
+info:
+  title: Relations API
+  description: Internally used API for retrieving content collection related content
+  version: v3.0.3
+  contact:
+    name: Universal Publishing
+    email: Universal.Publishing.Platform@ft.com
+  license:
+    name: MIT
+    url: 'https://opensource.org/licenses/MIT'
+servers:
+  - url: 'https://api.ft.com/'
+  - url: 'https://api-t.ft.com/'
+security:
+  - ApiKeyAuth: []
+paths:
+  '/content/{uuid}/relations':
+    get:
+      summary: Retrieves curated content.
+      description: >-
+        Given UUID of some content as a path parameter, responds with the
+        contents of CURATED relations.
+      tags:
+        - API
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: UUID of a piece of content
+          example: 9b6eb364-0275-11e7-b9ac-52b4e2bf8289
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns the content relations if they exists.
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    curatedRelatedContent:
+                      - id: >-
+                          http://api.ft.com/things/74bd05b4-edca-11e6-abbc-ee7d9c5b3b90
+                        apiUrl: >-
+                          http://api.ft.com/content/74bd05b4-edca-11e6-abbc-ee7d9c5b3b90
+                    contains:
+                      - id: >-
+                          http://api.ft.com/things/74bd05b4-edca-11e6-1234-ee7d9c5b3b90
+                        apiUrl: >-
+                          http://api.ft.com/content/74bd05b4-edca-11e6-abbc-ee7d9c5b3b90
+                      - id: >-
+                          http://api.ft.com/things/74bd05b4-edca-11e6-1313-ee7d9c5b3b90
+                        apiUrl: >-
+                          http://api.ft.com/content/74bd05b4-edca-11e6-abbc-ee7d9c5b3b90
+                    containedIn:
+                      - id: >-
+                          http://api.ft.com/things/74bd05b4-adsd-1342-abbc-ee7d9c5b3b90
+                        apiUrl: >-
+                          http://api.ft.com/content/74bd05b4-edca-11e6-abbc-ee7d9c5b3b90
+        '400':
+          description: Bad request e.g. missing or incorrectly spelt parameters.
+        '404':
+          description: No relations found for the given content UUID.
+        '500':
+          description: Internal Server Error if there was an issue processing the records.
+        '503':
+          description: Service Unavailable if it cannot connect to Neo4j.
+  '/contentcollection/{uuid}/relations':
+    get:
+      summary: Returns the contents contained in a content collection.
+      description: >-
+        Given UUID of some content as a path parameter, responds with the
+        contents of CONTAINS relations.
+      tags:
+        - API
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: UUID of a piece of content
+          example: 9b1faeea-737c-11e7-93ff-99f383b09ff9
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns the concordances if they exists.
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    containedIn: 64ed4ec4-737a-11e7-93ff-99f383b09ff9
+                    contains:
+                      - d9403324-6d33-11e7-bfeb-33fe0c5b7eaa
+                      - 427b8cb0-71d7-11e7-aca6-c6bd07df1a3c
+                      - 0a191800-7048-11e7-aca6-c6bd07df1a3c
+                      - 017456d0-6d53-11e7-bfeb-33fe0c5b7eaa
+                      - 31f191d4-72c0-11e7-93ff-99f383b09ff9
+                      - 6170d94a-6e21-11e7-b9c7-15af748b60d0
+        '400':
+          description: Bad request e.g. missing or incorrectly spelt parameters.
+        '404':
+          description: >-
+            Not Found if no concordances record for the uuid path parameter is
+            found.
+        '500':
+          description: Internal Server Error if there was an issue processing the records.
+        '503':
+          description: Service Unavailable if it cannot connect to Neo4j.
+  /__health:
+    servers:
+      - url: 'https://upp-prod-delivery-glb.upp.ft.com/__relations_api/'
+      - url: 'https://upp-staging-delivery-glb.upp.ft.com/__relations_api/'
+    get:
+      security:
+        - BasicAuth: []
+      summary: Healthchecks
+      description: Runs application healthchecks and returns FT Healthcheck style json.
+      tags:
+        - Health
+      responses:
+        '200':
+          description: >-
+            Should always return 200 along with the output of the healthchecks -
+            regardless of whether the healthchecks failed or not. Please inspect
+            the overall `ok` property to see whether or not the application is
+            healthy.
+  /__build-info:
+    servers:
+      - url: 'https://upp-prod-delivery-glb.upp.ft.com/__relations_api/'
+      - url: 'https://upp-staging-delivery-glb.upp.ft.com/__relations_api/'
+    get:
+      security:
+        - BasicAuth: []
+      summary: Build Information
+      description: >-
+        Returns application build info, such as the git repository and revision,
+        the golang version it was built with, and the app release version.
+      tags:
+        - Info
+      responses:
+        '200':
+          description: Outputs build information as described in the summary.
+  /__gtg:
+    servers:
+      - url: 'https://upp-prod-delivery-glb.upp.ft.com/__relations_api/'
+      - url: 'https://upp-staging-delivery-glb.upp.ft.com/__relations_api/'
+    get:
+      security:
+        - BasicAuth: []
+      summary: Good To Go
+      description: >-
+        Lightly healthchecks the application, and returns a 200 if it's
+        Good-To-Go.
+      tags:
+        - Health
+      responses:
+        '200':
+          description: >-
+            The application is healthy enough to perform all its functions
+            correctly - i.e. good to go.
+        '503':
+          description: >-
+            One or more of the applications healthchecks have failed, so please
+            do not use the app. See the /__health endpoint for more detailed
+            information.
+  /__api:
+    servers:
+      - url: 'https://upp-prod-delivery-glb.upp.ft.com/__relations_api/'
+      - url: 'https://upp-staging-delivery-glb.upp.ft.com/__relations_api/'
+    get:
+      security:
+        - BasicAuth: []
+      summary: API Documentation
+      description: Returns OpenAPI documentation for the application.
+      tags:
+        - Info
+      responses:
+        '200':
+          description: Returns OpenAPI information.
+          content:
+            text/plain;charset=utf-8:
+              schema:
+                type: string
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    BasicAuth:
+      type: http
+      scheme: basic
