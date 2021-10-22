@@ -7,8 +7,8 @@ import (
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/Financial-Times/service-status-go/gtg"
+	uuid "github.com/google/uuid"
 	"github.com/gorilla/mux"
-	uuid "github.com/satori/go.uuid"
 )
 
 type HttpHandlers struct {
@@ -162,7 +162,7 @@ func (hh *HttpHandlers) GetContentCollectionRelations(w http.ResponseWriter, r *
 }
 
 func validateUuid(contentUUID string) error {
-	parsedUUID, err := uuid.FromString(contentUUID)
+	parsedUUID, err := uuid.Parse(contentUUID)
 	if err != nil {
 		return err
 	}

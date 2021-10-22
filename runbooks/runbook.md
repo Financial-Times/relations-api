@@ -14,27 +14,6 @@ Platinum
 
 Production
 
-## Delivered By
-
-content
-
-## Supported By
-
-content
-
-## Known About By
-
-- dimitar.terziev
-- hristo.georgiev
-- elitsa.pavlova
-- elina.kaneva
-- kalin.arsov
-- ivan.nikolov
-- miroslav.gatsanoga
-- mihail.mihaylov
-- tsvetan.dimitrov
-- georgi.ivanov
-
 ## Host Platform
 
 AWS
@@ -53,10 +32,6 @@ No
 ## Contains Sensitive Data
 
 No
-
-## Dependencies
-
-- upp-neo4j-cluster
 
 ## Failover Architecture Type
 

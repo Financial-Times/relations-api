@@ -32,7 +32,7 @@ func TestGetContentRelationsHandler(t *testing.T) {
 	tests := []test{
 		{"Success", newRequest("GET", fmt.Sprintf("/content/%s/relations", knownUUID), nil), &cypherDriverMock{contentUUID: knownUUID}, http.StatusOK, successfulContentResponse},
 		{"NotFound", newRequest("GET", fmt.Sprintf("/content/%s/relations", "db90a9db-6cb6-4ba0-8648-c0676087aba2"), nil), &cypherDriverMock{contentUUID: knownUUID}, http.StatusNotFound, message("No relations found for content with uuid db90a9db-6cb6-4ba0-8648-c0676087aba2")},
-		{"InvalidUuid", newRequest("GET", fmt.Sprintf("/content/%s/relations", "99999"), nil), &cypherDriverMock{contentUUID: knownUUID}, http.StatusBadRequest, message("The given uuid is not valid, err=uuid: incorrect UUID length: 99999")},
+		{"InvalidUuid", newRequest("GET", fmt.Sprintf("/content/%s/relations", "99999"), nil), &cypherDriverMock{contentUUID: knownUUID}, http.StatusBadRequest, message("The given uuid is not valid, err=invalid UUID length: 5")},
 		{"ReadError", newRequest("GET", fmt.Sprintf("/content/%s/relations", knownUUID), nil), &cypherDriverMock{contentUUID: knownUUID, failRead: true}, http.StatusServiceUnavailable, message("Error retrieving relations for f78c1482-a65c-413e-b753-ca3ce3cb84f0, err=TEST failing to READ")},
 	}
 
@@ -51,7 +51,7 @@ func TestGetContentCollectionRelationsHandler(t *testing.T) {
 	tests := []test{
 		{"Success", newRequest("GET", fmt.Sprintf("/contentcollection/%s/relations", knownUUID), nil), &cypherDriverMock{contentUUID: knownUUID}, http.StatusOK, successfulContentCollectionResponse},
 		{"NotFound", newRequest("GET", fmt.Sprintf("/contentcollection/%s/relations", "db90a9db-6cb6-4ba0-8648-c0676087aba2"), nil), &cypherDriverMock{contentUUID: knownUUID}, http.StatusNotFound, message("No relations found for content collection with uuid db90a9db-6cb6-4ba0-8648-c0676087aba2")},
-		{"InvalidUuid", newRequest("GET", fmt.Sprintf("/contentcollection/%s/relations", "99999"), nil), &cypherDriverMock{contentUUID: knownUUID}, http.StatusBadRequest, message("The given uuid is not valid, err=uuid: incorrect UUID length: 99999")},
+		{"InvalidUuid", newRequest("GET", fmt.Sprintf("/contentcollection/%s/relations", "99999"), nil), &cypherDriverMock{contentUUID: knownUUID}, http.StatusBadRequest, message("The given uuid is not valid, err=invalid UUID length: 5")},
 		{"ReadError", newRequest("GET", fmt.Sprintf("/contentcollection/%s/relations", knownUUID), nil), &cypherDriverMock{contentUUID: knownUUID, failRead: true}, http.StatusServiceUnavailable, message("Error retrieving relations for f78c1482-a65c-413e-b753-ca3ce3cb84f0, err=TEST failing to READ")},
 	}
 
