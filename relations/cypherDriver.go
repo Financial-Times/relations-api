@@ -26,16 +26,20 @@ func (cd *cypherDriver) checkConnectivity() error {
 }
 
 func (cd *cypherDriver) findContentRelations(contentUUID string) (relations, bool, error) {
-	neoCRC := []neoRelatedContent{}
-	neoCPContains := []neoRelatedContent{}
-	neoCPContainedIn := []neoRelatedContent{}
+	var neoCRC, neoCPContains, neoCPContainedIn struct {
+		UUIDs []string `json:"uuids"`
+	}
+
+	// All of the queries use OPTIONAL MATCH because when a query doesn't match
+	// anything, the driver is not executing the queries after that one
 
 	queryCRC := &cmneo4j.Query{
 		Cypher: `
-                MATCH (c:Content{uuid:$contentUUID})<-[:IS_CURATED_FOR]-(cc:Curation)
-                MATCH (cc)-[rel:SELECTS]->(t:Content)
-                RETURN t.uuid as uuid
+                OPTIONAL MATCH (c:Content{uuid:$contentUUID})<-[:IS_CURATED_FOR]-(cc:Curation)
+                OPTIONAL MATCH (cc)-[rel:SELECTS]->(t:Content)
+                WITH t.uuid as uuid
                 ORDER BY rel.order
+                RETURN COLLECT(uuid) as uuids
                 `,
 		Params: map[string]interface{}{"contentUUID": contentUUID},
 		Result: &neoCRC,
@@ -43,10 +47,11 @@ func (cd *cypherDriver) findContentRelations(contentUUID string) (relations, boo
 
 	queryCPContains := &cmneo4j.Query{
 		Cypher: `
-                MATCH (cp:ContentPackage{uuid:$contentUUID})-[:CONTAINS]->(cc:ContentCollection)
-                MATCH (cc)-[rel:CONTAINS]->(c:Content)
-                RETURN c.uuid as uuid
+                OPTIONAL MATCH (cp:ContentPackage{uuid:$contentUUID})-[:CONTAINS]->(cc:ContentCollection)
+                OPTIONAL MATCH (cc)-[rel:CONTAINS]->(c:Content)
+                WITH c.uuid as uuid
                 ORDER BY rel.order
+                RETURN COLLECT(uuid) as uuids
                 `,
 		Params: map[string]interface{}{"contentUUID": contentUUID},
 		Result: &neoCPContains,
@@ -54,10 +59,11 @@ func (cd *cypherDriver) findContentRelations(contentUUID string) (relations, boo
 
 	queryCPContainedIn := &cmneo4j.Query{
 		Cypher: `
-                MATCH (c:Content{uuid:$contentUUID})<-[:CONTAINS]-(cc:ContentCollection)
-                MATCH (cc)<-[rel:CONTAINS]-(cp:ContentPackage)
-                RETURN cp.uuid as uuid
+                OPTIONAL MATCH (c:Content{uuid:$contentUUID})<-[:CONTAINS]-(cc:ContentCollection)
+                OPTIONAL MATCH (cc)<-[rel:CONTAINS]-(cp:ContentPackage)
+                WITH cp.uuid as uuid
                 ORDER BY rel.order
+                RETURN COLLECT(uuid) as uuids
                 `,
 		Params: map[string]interface{}{"contentUUID": contentUUID},
 		Result: &neoCPContainedIn,
@@ -68,15 +74,11 @@ func (cd *cypherDriver) findContentRelations(contentUUID string) (relations, boo
 		return relations{}, false, fmt.Errorf("Error querying Neo for uuid=%s, err=%v", contentUUID, err)
 	}
 
-	var found bool
+	found := len(neoCRC.UUIDs) != 0 || len(neoCPContains.UUIDs) != 0 || len(neoCPContainedIn.UUIDs) != 0
 
-	if len(neoCRC) != 0 || len(neoCPContains) != 0 || len(neoCPContainedIn) != 0 {
-		found = true
-	}
-
-	mappedCRC := transformToRelatedContent(neoCRC)
-	mappedCPC := transformToRelatedContent(neoCPContains)
-	mappedCIC := transformToRelatedContent(neoCPContainedIn)
+	mappedCRC := transformToRelatedContent(neoCRC.UUIDs)
+	mappedCPC := transformToRelatedContent(neoCPContains.UUIDs)
+	mappedCIC := transformToRelatedContent(neoCPContainedIn.UUIDs)
 	relations := relations{mappedCRC, mappedCPC, mappedCIC}
 
 	return relations, found, nil
@@ -85,6 +87,9 @@ func (cd *cypherDriver) findContentRelations(contentUUID string) (relations, boo
 func (cd *cypherDriver) findContentCollectionRelations(contentCollectionUUID string) (ccRelations, bool, error) {
 	neoCPContainedIn := []neoRelatedContent{}
 	neoCPContains := []neoRelatedContent{}
+
+	// There is no need to use OPTIONAL MATCH here because the first query
+	// determines whether or not the method returns found=true/false
 
 	queryCPContainedIn := &cmneo4j.Query{
 		Cypher: `
