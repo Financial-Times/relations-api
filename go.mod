@@ -4,7 +4,6 @@ go 1.17
 
 require (
 	github.com/Financial-Times/api-endpoint v1.0.0
-	github.com/Financial-Times/base-ft-rw-app-go v0.0.0-20171010162315-74eab27b0c6d
 	github.com/Financial-Times/content-collection-rw-neo4j v0.0.0-20170322121701-b3ba6c46f8d7
 	github.com/Financial-Times/content-rw-neo4j v1.0.3-0.20180613151118-5543bceb064c
 	github.com/Financial-Times/go-fthealth v0.0.0-20181009114238-ca83ad65381f
@@ -15,7 +14,6 @@ require (
 	github.com/Financial-Times/service-status-go v0.0.0-20160323111542-3f5199736a3d
 	github.com/Financial-Times/transactionid-utils-go v0.2.0 // indirect
 	github.com/Financial-Times/up-rw-app-api-go v0.0.0-20170710125828-d9d93a1f6895 // indirect
-	github.com/cyberdelia/go-metrics-graphite v0.0.0-20161219230853-39f87cc3b432 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/context v1.1.1 // indirect
@@ -38,5 +36,3 @@ require (
 	gopkg.in/jmcvetta/napping.v3 v3.2.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
-
-require github.com/Financial-Times/http-handlers-go v0.0.0-20170809121007-229ac16f1d9e // indirect

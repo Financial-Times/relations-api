@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Financial-Times/base-ft-rw-app-go/baseftrwapp"
 	"github.com/Financial-Times/content-collection-rw-neo4j/collection"
 	"github.com/Financial-Times/content-rw-neo4j/content"
 	"github.com/Financial-Times/neo-utils-go/neoutils"
@@ -159,13 +158,12 @@ func TestFindContentCollectionRelations_Ok(t *testing.T) {
 	assertListContainsAll(t, actualRelations.Contains, expectedResponse.Contains)
 }
 
-func writeContent(t testing.TB, conn neoutils.NeoConnection, data []payloadData) baseftrwapp.Service {
+func writeContent(t testing.TB, conn neoutils.NeoConnection, data []payloadData) {
 	contentRW := content.NewCypherContentService(conn)
 	assert.NoError(t, contentRW.Initialise())
 	for _, d := range data {
 		writeJSONWithService(t, contentRW, d.path)
 	}
-	return contentRW
 }
 
 func writeContentCollection(t testing.TB, conn neoutils.NeoConnection, data []payloadData, ccType string) {
