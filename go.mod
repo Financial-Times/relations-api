@@ -1,6 +1,6 @@
 module github.com/Financial-Times/relations-api/v3
 
-go 1.13
+go 1.17
 
 require (
 	github.com/Financial-Times/api-endpoint v1.0.0
@@ -20,12 +20,13 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.4.1-0.20170830053917-a659b61323b0
+	github.com/hashicorp/go-version v1.2.0 // indirect
 	github.com/jawher/mow.cli v1.0.4
 	github.com/jmcvetta/neoism v1.3.1
 	github.com/jmcvetta/randutil v0.0.0-20150817122601-2bb1b664bcff // indirect
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/onsi/ginkgo v1.12.0 // indirect
-	github.com/onsi/gomega v1.9.0 // indirect
+	github.com/kr/text v0.1.0 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a
 	github.com/sirupsen/logrus v1.0.4-0.20170822132746-89742aefa4b2 // indirect
 	github.com/stretchr/objx v0.1.1 // indirect
@@ -33,7 +34,9 @@ require (
 	go4.org v0.0.0-20181109185143-00e24f1b2599 // indirect
 	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc // indirect
 	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect
+	golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
 	gopkg.in/jmcvetta/napping.v3 v3.2.0 // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
