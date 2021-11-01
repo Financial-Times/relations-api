@@ -8,8 +8,8 @@ require (
 	github.com/Financial-Times/content-collection-rw-neo4j v0.0.0-20170322121701-b3ba6c46f8d7
 	github.com/Financial-Times/content-rw-neo4j v1.0.3-0.20180613151118-5543bceb064c
 	github.com/Financial-Times/go-fthealth v0.0.0-20181009114238-ca83ad65381f
-	github.com/Financial-Times/go-logger v0.0.0-20180323124113-febee6537e90
-	github.com/Financial-Times/http-handlers-go v0.0.0-20170809121007-229ac16f1d9e
+	github.com/Financial-Times/go-logger/v2 v2.0.1
+	github.com/Financial-Times/http-handlers-go/v2 v2.3.0
 	github.com/Financial-Times/neo-model-utils-go v0.0.0-20180712095719-aea1e95c8305
 	github.com/Financial-Times/neo-utils-go v0.0.0-20170822152035-5cb175009654
 	github.com/Financial-Times/service-status-go v0.0.0-20160323111542-3f5199736a3d
@@ -28,15 +28,15 @@ require (
 	github.com/kr/text v0.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a
-	github.com/sirupsen/logrus v1.0.4-0.20170822132746-89742aefa4b2 // indirect
+	github.com/sirupsen/logrus v1.0.5 // indirect
 	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/stretchr/testify v1.5.1
 	go4.org v0.0.0-20181109185143-00e24f1b2599 // indirect
 	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc // indirect
 	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect
 	golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e // indirect
-	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
-	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
 	gopkg.in/jmcvetta/napping.v3 v3.2.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
+
+require github.com/Financial-Times/http-handlers-go v0.0.0-20170809121007-229ac16f1d9e // indirect
