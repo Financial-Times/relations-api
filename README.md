@@ -25,7 +25,7 @@ go install
 Start Neo4J:
 
 ```shell script
-docker run --publish=7474:7474 --publish=7687:7687 -e NEO4J_AUTH=none -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes neo4j:3.4.10-enterprise
+docker run --publish=7474:7474 --publish=7687:7687 -e NEO4J_AUTH=none -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes neo4j:3.5.28-enterprise
 ```
 
 Execute test:
@@ -45,10 +45,12 @@ $GOPATH/bin/relations-api [--help]
 Options:
 
 ```shell script
-  --neo-url="http://localhost:7474/db/data"   neo4j endpoint URL ($NEO_URL)
-  --port="8080"                               Port to listen on ($PORT)
-  --cache-duration="30s"                      Duration Get requests should be cached for. e.g. 2h45m would set the max-a
-ge value to '7440' seconds ($CACHE_DURATION)
+--neo-url               neo-url value must use the bolt protocol (env $NEO_URL) (default "bolt://localhost:7687")
+--port                  Port to listen on (env $PORT) (default "8080")
+--cache-duration        Duration Get requests should be cached for. e.g. 2h45m would set the max-age value to '7440' seconds (env $CACHE_DURATION) (default "30s")
+--api-yml               Location of the API Swagger YML file. (env $API_YML) (default "./api.yml")
+--log-level             Logging level (DEBUG, INFO, WARN, ERROR) (env $LOG_LEVEL) (default "INFO")
+--db-driver-log-level   Db's driver log level (DEBUG, INFO, WARN, ERROR) (env $DB_DRIVER_LOG_LEVEL) (default "WARN")
 ```
 
 

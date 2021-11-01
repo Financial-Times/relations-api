@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/Financial-Times/api-endpoint"
+	cmneo4j "github.com/Financial-Times/cm-neo4j-driver"
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	logger "github.com/Financial-Times/go-logger/v2"
 	"github.com/Financial-Times/http-handlers-go/v2/httphandlers"
-	"github.com/Financial-Times/neo-utils-go/neoutils"
 	"github.com/Financial-Times/relations-api/v3/relations"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
 	"github.com/gorilla/mux"
@@ -28,8 +28,8 @@ func main() {
 	app := cli.App(serviceName, serviceDescription)
 	neoURL := app.String(cli.StringOpt{
 		Name:   "neo-url",
-		Value:  "http://localhost:7474/db/data",
-		Desc:   "neo4j endpoint URL",
+		Value:  "bolt://localhost:7687",
+		Desc:   "neo-url value must use the bolt protocol",
 		EnvVar: "NEO_URL"})
 	port := app.String(cli.StringOpt{
 		Name:   "port",
@@ -49,18 +49,32 @@ func main() {
 		Desc:   "Location of the API Swagger YML file.",
 		EnvVar: "API_YML",
 	})
-
-	log := logger.NewUPPInfoLogger(serviceName)
+	logLevel := app.String(cli.StringOpt{
+		Name:   "log-level",
+		Value:  "INFO",
+		Desc:   "Logging level (DEBUG, INFO, WARN, ERROR)",
+		EnvVar: "LOG_LEVEL",
+	})
+	dbDriverLogLevel := app.String(cli.StringOpt{
+		Name:   "db-driver-log-level",
+		Value:  "WARN",
+		Desc:   "Db's driver log level (DEBUG, INFO, WARN, ERROR)",
+		EnvVar: "DB_DRIVER_LOG_LEVEL",
+	})
 
 	app.Action = func() {
+		log := logger.NewUPPLogger(serviceName, *logLevel)
+		dbDriverLog := logger.NewUPPLogger(serviceName+"-cm-neo4j-driver", *dbDriverLogLevel)
+
+		log.WithField("args", os.Args).Info("Application started")
 		log.Infof("relations-api will listen on port: %s, connecting to: %s", *port, *neoURL)
-		runServer(*neoURL, *port, *cacheDuration, *apiYml, log)
+
+		runServer(*neoURL, *port, *cacheDuration, *apiYml, log, dbDriverLog)
 	}
-	log.WithField("args", os.Args).Info("Application started")
 	app.Run(os.Args)
 }
 
-func runServer(neoURL, port, cacheDuration, apiYml string, log *logger.UPPLogger) {
+func runServer(neoURL, port, cacheDuration, apiYml string, log, dbDriverLog *logger.UPPLogger) {
 	var cacheControlHeader string
 	if duration, durationErr := time.ParseDuration(cacheDuration); durationErr != nil {
 		log.WithError(durationErr).Fatal("Failed to parse cache duration string")
@@ -68,24 +82,12 @@ func runServer(neoURL, port, cacheDuration, apiYml string, log *logger.UPPLogger
 		cacheControlHeader = fmt.Sprintf("max-age=%s, public", strconv.FormatFloat(duration.Seconds(), 'f', 0, 64))
 	}
 
-	conf := neoutils.ConnectionConfig{
-		BatchSize:     1024,
-		Transactional: false,
-		HTTPClient: &http.Client{
-			Transport: &http.Transport{
-				MaxIdleConnsPerHost: 100,
-			},
-			Timeout: 1 * time.Minute,
-		},
-		BackgroundConnect: true,
-	}
-	conn, err := neoutils.Connect(neoURL, &conf)
-
+	driver, err := cmneo4j.NewDefaultDriver(neoURL, dbDriverLog)
 	if err != nil {
-		log.WithError(err).Fatal("Error connecting to neo4j")
+		log.WithError(err).Fatal("Failed to create new cmneo4j driver")
 	}
 
-	httpHandlers := relations.NewHttpHandlers(relations.NewCypherDriver(conn), cacheControlHeader)
+	httpHandlers := relations.NewHttpHandlers(relations.NewCypherDriver(driver), cacheControlHeader)
 	// The following endpoints should not be monitored or logged (varnish calls one of these every second, depending on config)
 	// The top one of these build info endpoints feels more correct, but the lower one matches what we have in Dropwizard,
 	// so it's what apps expect currently same as ping, the content of build-info needs more definition

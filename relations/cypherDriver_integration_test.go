@@ -2,16 +2,16 @@ package relations
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
 
+	cmneo4j "github.com/Financial-Times/cm-neo4j-driver"
 	"github.com/Financial-Times/content-collection-rw-neo4j/collection"
 	"github.com/Financial-Times/content-rw-neo4j/content"
+	"github.com/Financial-Times/go-logger/v2"
 	"github.com/Financial-Times/neo-utils-go/neoutils"
-	"github.com/jmcvetta/neoism"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -63,15 +63,15 @@ func TestFindContentRelations_StoryPackage_Ok(t *testing.T) {
 		},
 	}
 	conn := getDatabaseConnection(t)
+	driver := getNeo4jDriver(t)
 	contents := []payloadData{leadContentSP, relatedContent1, relatedContent2, relatedContent3}
-	cleanDB(t, conn, allData)
 
 	writeContent(t, conn, contents)
 	writeContentCollection(t, conn, []payloadData{storyPackage}, "StoryPackage")
-	defer cleanDB(t, conn, allData)
+	defer cleanDB(t, driver, allData)
 
-	driver := NewCypherDriver(conn)
-	actualRelations, found, err := driver.findContentRelations(leadContentSP.uuid)
+	cypherDriver := NewCypherDriver(driver)
+	actualRelations, found, err := cypherDriver.findContentRelations(leadContentSP.uuid)
 	assert.NoError(t, err, "Unexpected error for content %s", leadContentSP.uuid)
 	assert.True(t, found, "Found no relations for content %s", leadContentSP.uuid)
 
@@ -90,15 +90,15 @@ func TestFindContentRelations_ContentPackage_Ok(t *testing.T) {
 		},
 	}
 	conn := getDatabaseConnection(t)
+	driver := getNeo4jDriver(t)
 	contents := []payloadData{leadContentCP, relatedContent1, relatedContent2}
-	cleanDB(t, conn, allData)
 
 	writeContent(t, conn, contents)
 	writeContentCollection(t, conn, []payloadData{contentPackage}, "ContentPackage")
-	defer cleanDB(t, conn, allData)
+	defer cleanDB(t, driver, allData)
 
-	driver := NewCypherDriver(conn)
-	actualRelations, found, err := driver.findContentRelations(leadContentCP.uuid)
+	cypherDriver := NewCypherDriver(driver)
+	actualRelations, found, err := cypherDriver.findContentRelations(leadContentCP.uuid)
 	assert.NoError(t, err, "Unexpected error for content %s", leadContentCP.uuid)
 	assert.True(t, found, "Found no relations for content %s", leadContentCP.uuid)
 
@@ -116,15 +116,15 @@ func TestFindContentRelations_Content_In_ContentPackage_Ok(t *testing.T) {
 		},
 	}
 	conn := getDatabaseConnection(t)
+	driver := getNeo4jDriver(t)
 	contents := []payloadData{leadContentCP, relatedContent1, relatedContent2}
-	cleanDB(t, conn, allData)
 
 	writeContent(t, conn, contents)
 	writeContentCollection(t, conn, []payloadData{contentPackage}, "ContentPackage")
-	defer cleanDB(t, conn, allData)
+	defer cleanDB(t, driver, allData)
 
-	driver := NewCypherDriver(conn)
-	actualRelations, found, err := driver.findContentRelations(relatedContent1.uuid)
+	cypherDriver := NewCypherDriver(driver)
+	actualRelations, found, err := cypherDriver.findContentRelations(relatedContent1.uuid)
 	assert.NoError(t, err, "Unexpected error for content %s", relatedContent1.uuid)
 	assert.True(t, found, "Found no relations for content %s", relatedContent1.uuid)
 
@@ -141,15 +141,15 @@ func TestFindContentCollectionRelations_Ok(t *testing.T) {
 		Contains:    []string{"3fc9fe3e-af8c-1a1a-961a-e5065392bb31", "3fc9fe3e-af8c-2a2a-961a-e5065392bb31"},
 	}
 	conn := getDatabaseConnection(t)
+	driver := getNeo4jDriver(t)
 	contents := []payloadData{leadContentCP, relatedContent1, relatedContent2}
-	cleanDB(t, conn, allData)
 
 	writeContent(t, conn, contents)
 	writeContentCollection(t, conn, []payloadData{contentPackage}, "ContentPackage")
-	defer cleanDB(t, conn, allData)
+	defer cleanDB(t, driver, allData)
 
-	driver := NewCypherDriver(conn)
-	actualRelations, found, err := driver.findContentCollectionRelations(contentPackage.uuid)
+	cypherDriver := NewCypherDriver(driver)
+	actualRelations, found, err := cypherDriver.findContentCollectionRelations(contentPackage.uuid)
 	assert.NoError(t, err, "Unexpected error for content package %s", contentPackage.uuid)
 	assert.True(t, found, "Found no relations for content package %s", contentPackage.uuid)
 
@@ -238,14 +238,27 @@ func getDatabaseConnection(t testing.TB) neoutils.NeoConnection {
 	return conn
 }
 
-func cleanDB(t testing.TB, conn neoutils.NeoConnection, data []payloadData) {
-	qs := make([]*neoism.CypherQuery, len(data))
-	for i, d := range data {
-		qs[i] = &neoism.CypherQuery{
-			Statement: fmt.Sprintf(`
-			MATCH (a:Thing {uuid: "%s"})
-			DETACH DELETE a`, d.uuid)}
+func getNeo4jDriver(t testing.TB) *cmneo4j.Driver {
+	t.Helper()
+
+	url := os.Getenv("NEO4J_BOLT_TEST_URL")
+	if url == "" {
+		url = "bolt://localhost:7687"
 	}
-	err := conn.CypherBatch(qs)
+	log := logger.NewUPPLogger("cm-neo4j-driver-integration-tests", "PANIC")
+	driver, err := cmneo4j.NewDefaultDriver(url, log)
+	assert.NoError(t, err, "Unexpected error when creating a new db driver")
+	return driver
+}
+
+func cleanDB(t testing.TB, driver *cmneo4j.Driver, data []payloadData) {
+	qs := make([]*cmneo4j.Query, len(data))
+	for i, d := range data {
+		qs[i] = &cmneo4j.Query{
+			Cypher: `MATCH (a:Thing {uuid: $uuid}) DETACH DELETE a`,
+			Params: map[string]interface{}{"uuid": d.uuid},
+		}
+	}
+	err := driver.Write(qs...)
 	assert.NoError(t, err)
 }

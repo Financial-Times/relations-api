@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/Financial-Times/api-endpoint v1.0.0
+	github.com/Financial-Times/cm-neo4j-driver v0.0.1
 	github.com/Financial-Times/content-collection-rw-neo4j v0.0.0-20170322121701-b3ba6c46f8d7
 	github.com/Financial-Times/content-rw-neo4j v1.0.3-0.20180613151118-5543bceb064c
 	github.com/Financial-Times/go-fthealth v0.0.0-20181009114238-ca83ad65381f
@@ -30,9 +31,11 @@ require (
 	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/stretchr/testify v1.5.1
 	go4.org v0.0.0-20181109185143-00e24f1b2599 // indirect
-	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc // indirect
-	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect
-	golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e // indirect
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
+	golang.org/x/net v0.0.0-20211029224645-99673261e6eb // indirect
+	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	gopkg.in/jmcvetta/napping.v3 v3.2.0 // indirect
-	gopkg.in/yaml.v2 v2.3.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
+
+require github.com/neo4j/neo4j-go-driver/v4 v4.3.3 // indirect
