@@ -17,7 +17,7 @@ type cypherDriver struct {
 	driver *cmneo4j.Driver
 }
 
-func NewCypherDriver(driver *cmneo4j.Driver) *cypherDriver {
+func NewCypherDriver(driver *cmneo4j.Driver) Driver {
 	return &cypherDriver{driver}
 }
 
