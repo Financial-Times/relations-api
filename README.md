@@ -22,17 +22,16 @@ go install
 
 ### Tests
 
-Start Neo4J:
+* Run unit tests only: `go test -race ./...`
+* Run unit and integration tests:
 
-```shell script
-docker run --publish=7474:7474 --publish=7687:7687 -e NEO4J_AUTH=none -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes neo4j:3.5.28-enterprise
-```
-
-Execute test:
-
-```shell script
-go test -mod=readonly -race ./...
-```
+    In order to execute the integration tests you must provide GITHUB_USERNAME and GITHUB_TOKEN values, because the service is depending on internal repositories.
+    ```
+    GITHUB_USERNAME=<username> GITHUB_TOKEN=<token> \
+    docker-compose -f docker-compose-tests.yml up -d --build && \
+    docker logs -f test-runner && \
+    docker-compose -f docker-compose-tests.yml down -v
+    ```
 
 ### Running locally
 
