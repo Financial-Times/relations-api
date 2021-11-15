@@ -21,10 +21,11 @@ require (
 	github.com/gorilla/mux v1.4.1-0.20170830053917-a659b61323b0
 	github.com/hashicorp/go-version v1.2.0 // indirect
 	github.com/jawher/mow.cli v1.0.4
-	github.com/jmcvetta/neoism v1.3.1
+	github.com/jmcvetta/neoism v1.3.1 // indirect
 	github.com/jmcvetta/randutil v0.0.0-20150817122601-2bb1b664bcff // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/kr/text v0.1.0 // indirect
+	github.com/neo4j/neo4j-go-driver/v4 v4.3.3 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a
 	github.com/sirupsen/logrus v1.0.5 // indirect
@@ -37,5 +38,3 @@ require (
 	gopkg.in/jmcvetta/napping.v3 v3.2.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
-
-require github.com/neo4j/neo4j-go-driver/v4 v4.3.3 // indirect
