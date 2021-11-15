@@ -46,7 +46,7 @@ Options:
 ```shell script
 --neo-url               neo-url value must use the bolt protocol (env $NEO_URL) (default "bolt://localhost:7687")
 --port                  Port to listen on (env $PORT) (default "8080")
---cache-duration        Duration Get requests should be cached for. e.g. 2h45m would set the max-age value to '7440' seconds (env $CACHE_DURATION) (default "30s")
+--cache-duration        Duration Get requests should be cached for. e.g. 2h45m would set the max-age value to '9900' seconds (env $CACHE_DURATION) (default "30s")
 --api-yml               Location of the API Swagger YML file. (env $API_YML) (default "./api.yml")
 --log-level             Logging level (DEBUG, INFO, WARN, ERROR) (env $LOG_LEVEL) (default "INFO")
 --db-driver-log-level   Db's driver log level (DEBUG, INFO, WARN, ERROR) (env $DB_DRIVER_LOG_LEVEL) (default "WARN")

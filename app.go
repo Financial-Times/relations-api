@@ -40,7 +40,7 @@ func main() {
 	cacheDuration := app.String(cli.StringOpt{
 		Name:   "cache-duration",
 		Value:  "30s",
-		Desc:   "Duration Get requests should be cached for. e.g. 2h45m would set the max-age value to '7440' seconds",
+		Desc:   "Duration Get requests should be cached for. e.g. 2h45m would set the max-age value to '9900' seconds",
 		EnvVar: "CACHE_DURATION",
 	})
 	apiYml := app.String(cli.StringOpt{
