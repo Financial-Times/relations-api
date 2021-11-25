@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/Financial-Times/api-endpoint v1.0.0
-	github.com/Financial-Times/cm-neo4j-driver v0.0.1
+	github.com/Financial-Times/cm-neo4j-driver v0.1.1
 	github.com/Financial-Times/content-collection-rw-neo4j v0.0.0-20170322121701-b3ba6c46f8d7
 	github.com/Financial-Times/content-rw-neo4j v1.0.3-0.20180613151118-5543bceb064c
 	github.com/Financial-Times/go-fthealth v0.0.0-20181009114238-ca83ad65381f

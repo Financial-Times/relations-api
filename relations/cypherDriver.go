@@ -22,7 +22,7 @@ func NewCypherDriver(driver *cmneo4j.Driver) Driver {
 }
 
 func (cd *cypherDriver) checkConnectivity() error {
-	return cd.driver.VerifyConnectivity()
+	return cd.driver.VerifyWriteConnectivity()
 }
 
 func (cd *cypherDriver) findContentRelations(contentUUID string) (relations, bool, error) {
