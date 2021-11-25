@@ -1,10 +1,10 @@
 package relations
 
 import (
+	"errors"
 	"fmt"
 
-	"github.com/Financial-Times/neo-utils-go/neoutils"
-	"github.com/jmcvetta/neoism"
+	cmneo4j "github.com/Financial-Times/cm-neo4j-driver"
 )
 
 type Driver interface {
@@ -14,69 +14,71 @@ type Driver interface {
 }
 
 type cypherDriver struct {
-	conn neoutils.NeoConnection
+	driver *cmneo4j.Driver
 }
 
-func NewCypherDriver(conn neoutils.NeoConnection) *cypherDriver {
-	return &cypherDriver{conn}
+func NewCypherDriver(driver *cmneo4j.Driver) Driver {
+	return &cypherDriver{driver}
 }
 
 func (cd *cypherDriver) checkConnectivity() error {
-	return neoutils.Check(cd.conn)
+	return cd.driver.VerifyConnectivity()
 }
 
 func (cd *cypherDriver) findContentRelations(contentUUID string) (relations, bool, error) {
-	neoCRC := []neoRelatedContent{}
-	neoCPContains := []neoRelatedContent{}
-	neoCPContainedIn := []neoRelatedContent{}
-
-	queryCRC := &neoism.CypherQuery{
-		Statement: `
-                MATCH (c:Content{uuid:{contentUUID}})<-[:IS_CURATED_FOR]-(cc:Curation)
-                MATCH (cc)-[rel:SELECTS]->(t:Content)
-                RETURN t.uuid as uuid
-                ORDER BY rel.order
-                `,
-		Parameters: neoism.Props{"contentUUID": contentUUID},
-		Result:     &neoCRC,
+	var neoCRC, neoCPContains, neoCPContainedIn struct {
+		UUIDs []string `json:"uuids"`
 	}
 
-	queryCPContains := &neoism.CypherQuery{
-		Statement: `
-                MATCH (cp:ContentPackage{uuid:{contentUUID}})-[:CONTAINS]->(cc:ContentCollection)
-                MATCH (cc)-[rel:CONTAINS]->(c:Content)
-                RETURN c.uuid as uuid
+	// All of the queries use OPTIONAL MATCH because when a query doesn't match
+	// anything, the driver is not executing the queries after that one
+
+	queryCRC := &cmneo4j.Query{
+		Cypher: `
+                OPTIONAL MATCH (c:Content{uuid:$contentUUID})<-[:IS_CURATED_FOR]-(cc:Curation)
+                OPTIONAL MATCH (cc)-[rel:SELECTS]->(t:Content)
+                WITH t.uuid as uuid
                 ORDER BY rel.order
+                RETURN COLLECT(uuid) as uuids
                 `,
-		Parameters: neoism.Props{"contentUUID": contentUUID},
-		Result:     &neoCPContains,
+		Params: map[string]interface{}{"contentUUID": contentUUID},
+		Result: &neoCRC,
 	}
 
-	queryCPContainedIn := &neoism.CypherQuery{
-		Statement: `
-                MATCH (c:Content{uuid:{contentUUID}})<-[:CONTAINS]-(cc:ContentCollection)
-                MATCH (cc)<-[rel:CONTAINS]-(cp:ContentPackage)
-                RETURN cp.uuid as uuid
+	queryCPContains := &cmneo4j.Query{
+		Cypher: `
+                OPTIONAL MATCH (cp:ContentPackage{uuid:$contentUUID})-[:CONTAINS]->(cc:ContentCollection)
+                OPTIONAL MATCH (cc)-[rel:CONTAINS]->(c:Content)
+                WITH c.uuid as uuid
                 ORDER BY rel.order
+                RETURN COLLECT(uuid) as uuids
                 `,
-		Parameters: neoism.Props{"contentUUID": contentUUID},
-		Result:     &neoCPContainedIn,
+		Params: map[string]interface{}{"contentUUID": contentUUID},
+		Result: &neoCPContains,
 	}
 
-	err := cd.conn.CypherBatch([]*neoism.CypherQuery{queryCRC, queryCPContains, queryCPContainedIn})
-	if err != nil {
+	queryCPContainedIn := &cmneo4j.Query{
+		Cypher: `
+                OPTIONAL MATCH (c:Content{uuid:$contentUUID})<-[:CONTAINS]-(cc:ContentCollection)
+                OPTIONAL MATCH (cc)<-[rel:CONTAINS]-(cp:ContentPackage)
+                WITH cp.uuid as uuid
+                ORDER BY rel.order
+                RETURN COLLECT(uuid) as uuids
+                `,
+		Params: map[string]interface{}{"contentUUID": contentUUID},
+		Result: &neoCPContainedIn,
+	}
+
+	err := cd.driver.Read(queryCRC, queryCPContains, queryCPContainedIn)
+	if err != nil && !errors.Is(err, cmneo4j.ErrNoResultsFound) {
 		return relations{}, false, fmt.Errorf("Error querying Neo for uuid=%s, err=%v", contentUUID, err)
 	}
 
-	var found bool
+	found := len(neoCRC.UUIDs) != 0 || len(neoCPContains.UUIDs) != 0 || len(neoCPContainedIn.UUIDs) != 0
 
-	if len(neoCRC) != 0 || len(neoCPContains) != 0 || len(neoCPContainedIn) != 0 {
-		found = true
-	}
-
-	mappedCRC := transformToRelatedContent(neoCRC)
-	mappedCPC := transformToRelatedContent(neoCPContains)
-	mappedCIC := transformToRelatedContent(neoCPContainedIn)
+	mappedCRC := transformToRelatedContent(neoCRC.UUIDs)
+	mappedCPC := transformToRelatedContent(neoCPContains.UUIDs)
+	mappedCIC := transformToRelatedContent(neoCPContainedIn.UUIDs)
 	relations := relations{mappedCRC, mappedCPC, mappedCIC}
 
 	return relations, found, nil
@@ -86,34 +88,34 @@ func (cd *cypherDriver) findContentCollectionRelations(contentCollectionUUID str
 	neoCPContainedIn := []neoRelatedContent{}
 	neoCPContains := []neoRelatedContent{}
 
-	queryCPContainedIn := &neoism.CypherQuery{
-		Statement: `
-                MATCH (cc:ContentCollection{uuid:{contentCollectionUUID}})<-[rel:CONTAINS]-(cp:ContentPackage)
+	// There is no need to use OPTIONAL MATCH here because the first query
+	// determines whether or not the method returns found=true/false
+
+	queryCPContainedIn := &cmneo4j.Query{
+		Cypher: `
+                MATCH (cc:ContentCollection{uuid:$contentCollectionUUID})<-[rel:CONTAINS]-(cp:ContentPackage)
                 RETURN cp.uuid as uuid
                 `,
-		Parameters: neoism.Props{"contentCollectionUUID": contentCollectionUUID},
-		Result:     &neoCPContainedIn,
+		Params: map[string]interface{}{"contentCollectionUUID": contentCollectionUUID},
+		Result: &neoCPContainedIn,
 	}
 
-	queryCPContains := &neoism.CypherQuery{
-		Statement: `
-                MATCH (cc:ContentCollection{uuid:{contentCollectionUUID}})-[rel:CONTAINS]->(c:Content)
+	queryCPContains := &cmneo4j.Query{
+		Cypher: `
+                MATCH (cc:ContentCollection{uuid:$contentCollectionUUID})-[rel:CONTAINS]->(c:Content)
                 RETURN c.uuid as uuid
                 ORDER BY rel.order
                 `,
-		Parameters: neoism.Props{"contentCollectionUUID": contentCollectionUUID},
-		Result:     &neoCPContains,
+		Params: map[string]interface{}{"contentCollectionUUID": contentCollectionUUID},
+		Result: &neoCPContains,
 	}
 
-	err := cd.conn.CypherBatch([]*neoism.CypherQuery{queryCPContains, queryCPContainedIn})
-	if err != nil {
+	err := cd.driver.Read(queryCPContains, queryCPContainedIn)
+	if err != nil && !errors.Is(err, cmneo4j.ErrNoResultsFound) {
 		return ccRelations{}, false, fmt.Errorf("Error querying Neo for uuid=%s, err=%v", contentCollectionUUID, err)
 	}
 
-	var found bool
-	if len(neoCPContainedIn) != 0 {
-		found = true
-	}
+	found := len(neoCPContainedIn) != 0
 
 	mappedContainedIn := transformContainedInToCCRelations(neoCPContainedIn)
 	mappedContains := transformContainsToCCRelations(neoCPContains)

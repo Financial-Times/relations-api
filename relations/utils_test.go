@@ -2,13 +2,14 @@ package relations
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-var givenNeoRelatedContent []neoRelatedContent = []neoRelatedContent{
-	{UUID: "db90a9db-6cb6-4ba0-8648-c0676087aba2"},
-	{UUID: "f78c1482-abab-413e-b753-ca3ce3cb84f0"},
+var givenNeoRelatedContent []string = []string{
+	"db90a9db-6cb6-4ba0-8648-c0676087aba2",
+	"f78c1482-abab-413e-b753-ca3ce3cb84f0",
 }
 
 var expectedRelatedContent []relatedContent = []relatedContent{
@@ -25,8 +26,8 @@ func TestTransformToRelatedContentHappyFlow(t *testing.T) {
 }
 
 func TestTransformToRelatedContentNoRelations(t *testing.T) {
-	givenNeoRelatedContent := []neoRelatedContent{}
-	expectedRelatedContent := []neoRelatedContent{}
+	givenNeoRelatedContent := []string{}
+	expectedRelatedContent := []string{}
 
 	relatedContent := transformToRelatedContent(givenNeoRelatedContent)
 

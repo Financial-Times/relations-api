@@ -1,0 +1,12 @@
+FROM golang:1
+
+ARG GITHUB_USERNAME
+ARG GITHUB_TOKEN
+
+COPY . ./relations-api
+WORKDIR ./relations-api
+
+RUN git clone https://github.com/vishnubob/wait-for-it.git \
+   && git config --global url."https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com".insteadOf "https://github.com"
+
+ENTRYPOINT [ "./wait-for-it/wait-for-it.sh", "neo4j:7474", "-t", "60", "--strict", "--" ]
