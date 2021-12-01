@@ -19,4 +19,4 @@ workflows:
     jobs:
       - ft-golang-ci/scan:
           name: scan-dependencies
-          context: org-global
+          context: cm-team-snyk
