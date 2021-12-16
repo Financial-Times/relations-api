@@ -226,7 +226,7 @@ func assertListContainsAll(t *testing.T, list interface{}, items ...interface{})
 func getNeo4jDriver(t testing.TB) *cmneo4j.Driver {
 	t.Helper()
 
-	url := os.Getenv("NEO4J_BOLT_TEST_URL")
+	url := os.Getenv("NEO4J_TEST_URL")
 	if url == "" {
 		url = "bolt://localhost:7687"
 	}
