@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package relations
 
 import (
@@ -9,9 +12,8 @@ import (
 
 	cmneo4j "github.com/Financial-Times/cm-neo4j-driver"
 	"github.com/Financial-Times/content-collection-rw-neo4j/collection"
-	"github.com/Financial-Times/content-rw-neo4j/content"
+	"github.com/Financial-Times/content-rw-neo4j/v3/content"
 	"github.com/Financial-Times/go-logger/v2"
-	"github.com/Financial-Times/neo-utils-go/neoutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -25,7 +27,7 @@ type payloadData struct {
 
 type collectionService interface {
 	DecodeJSON(dec *json.Decoder) (interface{}, string, error)
-	Write(newThing interface{}) error
+	Write(newThing interface{}, transactionID string) error
 }
 
 type contentService interface {
@@ -62,12 +64,11 @@ func TestFindContentRelations_StoryPackage_Ok(t *testing.T) {
 			{relatedContent3.id, relatedContent3.apiURL},
 		},
 	}
-	conn := getDatabaseConnection(t)
 	driver := getNeo4jDriver(t)
 	contents := []payloadData{leadContentSP, relatedContent1, relatedContent2, relatedContent3}
 
-	writeContent(t, conn, contents)
-	writeContentCollection(t, conn, []payloadData{storyPackage}, "StoryPackage")
+	writeContent(t, driver, contents)
+	writeContentCollection(t, driver, []payloadData{storyPackage}, "StoryPackage")
 	defer cleanDB(t, driver, allData)
 
 	cypherDriver := NewCypherDriver(driver)
@@ -89,12 +90,11 @@ func TestFindContentRelations_ContentPackage_Ok(t *testing.T) {
 			{relatedContent2.id, relatedContent2.apiURL},
 		},
 	}
-	conn := getDatabaseConnection(t)
 	driver := getNeo4jDriver(t)
 	contents := []payloadData{leadContentCP, relatedContent1, relatedContent2}
 
-	writeContent(t, conn, contents)
-	writeContentCollection(t, conn, []payloadData{contentPackage}, "ContentPackage")
+	writeContent(t, driver, contents)
+	writeContentCollection(t, driver, []payloadData{contentPackage}, "ContentPackage")
 	defer cleanDB(t, driver, allData)
 
 	cypherDriver := NewCypherDriver(driver)
@@ -115,12 +115,11 @@ func TestFindContentRelations_Content_In_ContentPackage_Ok(t *testing.T) {
 			{leadContentCP.id, leadContentCP.apiURL},
 		},
 	}
-	conn := getDatabaseConnection(t)
 	driver := getNeo4jDriver(t)
 	contents := []payloadData{leadContentCP, relatedContent1, relatedContent2}
 
-	writeContent(t, conn, contents)
-	writeContentCollection(t, conn, []payloadData{contentPackage}, "ContentPackage")
+	writeContent(t, driver, contents)
+	writeContentCollection(t, driver, []payloadData{contentPackage}, "ContentPackage")
 	defer cleanDB(t, driver, allData)
 
 	cypherDriver := NewCypherDriver(driver)
@@ -140,12 +139,11 @@ func TestFindContentCollectionRelations_Ok(t *testing.T) {
 		ContainedIn: "3fc9fe3e-af8c-1b1b-961a-e5065392bb31",
 		Contains:    []string{"3fc9fe3e-af8c-1a1a-961a-e5065392bb31", "3fc9fe3e-af8c-2a2a-961a-e5065392bb31"},
 	}
-	conn := getDatabaseConnection(t)
 	driver := getNeo4jDriver(t)
 	contents := []payloadData{leadContentCP, relatedContent1, relatedContent2}
 
-	writeContent(t, conn, contents)
-	writeContentCollection(t, conn, []payloadData{contentPackage}, "ContentPackage")
+	writeContent(t, driver, contents)
+	writeContentCollection(t, driver, []payloadData{contentPackage}, "ContentPackage")
 	defer cleanDB(t, driver, allData)
 
 	cypherDriver := NewCypherDriver(driver)
@@ -158,15 +156,15 @@ func TestFindContentCollectionRelations_Ok(t *testing.T) {
 	assertListContainsAll(t, actualRelations.Contains, expectedResponse.Contains)
 }
 
-func writeContent(t testing.TB, conn neoutils.NeoConnection, data []payloadData) {
-	contentRW := content.NewCypherContentService(conn)
+func writeContent(t testing.TB, driver *cmneo4j.Driver, data []payloadData) {
+	contentRW := content.NewContentService(driver)
 	assert.NoError(t, contentRW.Initialise())
 	for _, d := range data {
 		writeJSONWithService(t, contentRW, d.path)
 	}
 }
 
-func writeContentCollection(t testing.TB, conn neoutils.NeoConnection, data []payloadData, ccType string) {
+func writeContentCollection(t testing.TB, driver *cmneo4j.Driver, data []payloadData, ccType string) {
 	labels := []string{}
 	relation := "CONTAINS"
 	if ccType == "StoryPackage" {
@@ -174,7 +172,7 @@ func writeContentCollection(t testing.TB, conn neoutils.NeoConnection, data []pa
 		relation = "SELECTS"
 	}
 
-	contentCollectionRW := collection.NewContentCollectionService(conn, labels, relation)
+	contentCollectionRW := collection.NewContentCollectionService(driver, labels, relation, "")
 	assert.NoError(t, contentCollectionRW.Initialise())
 	for _, d := range data {
 		writeJSONWithContentCollectionService(t, contentCollectionRW, d.path)
@@ -205,7 +203,7 @@ func writeJSONWithContentCollectionService(t testing.TB, service collectionServi
 	dec := json.NewDecoder(f)
 	inst, _, err := service.DecodeJSON(dec)
 	require.NoError(t, err)
-	err = service.Write(inst)
+	err = service.Write(inst, "test")
 	require.NoError(t, err)
 }
 
@@ -225,23 +223,10 @@ func assertListContainsAll(t *testing.T, list interface{}, items ...interface{})
 	}
 }
 
-func getDatabaseConnection(t testing.TB) neoutils.NeoConnection {
-	url := os.Getenv("NEO4J_TEST_URL")
-	if url == "" {
-		url = "http://localhost:7474/db/data"
-	}
-
-	conf := neoutils.DefaultConnectionConfig()
-	conf.Transactional = false
-	conn, err := neoutils.Connect(url, conf)
-	require.NoError(t, err, "Failed to connect to Neo4j")
-	return conn
-}
-
 func getNeo4jDriver(t testing.TB) *cmneo4j.Driver {
 	t.Helper()
 
-	url := os.Getenv("NEO4J_BOLT_TEST_URL")
+	url := os.Getenv("NEO4J_TEST_URL")
 	if url == "" {
 		url = "bolt://localhost:7687"
 	}
