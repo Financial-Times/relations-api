@@ -11,7 +11,7 @@ services:
         GITHUB_TOKEN: "${GITHUB_TOKEN}"
     environment:
       - NEO4J_TEST_URL=bolt://neo4j:7687
-    command: [ "go", "test", "-mod=readonly", "-tags=integration" , "./..." ]
+    command: [ "go", "test", "-v", "-mod=readonly", "-tags=integration" , "./..." ]
     depends_on:
       - neo4j
   neo4j:
