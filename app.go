@@ -57,13 +57,13 @@ func main() {
 	})
 	dbDriverLogLevel := app.String(cli.StringOpt{
 		Name:   "db-driver-log-level",
-		Value:  "WARN",
+		Value:  "ERROR",
 		Desc:   "Db's driver log level (DEBUG, INFO, WARN, ERROR)",
 		EnvVar: "DB_DRIVER_LOG_LEVEL",
 	})
 
+	log := logger.NewUPPLogger(serviceName, *logLevel)
 	app.Action = func() {
-		log := logger.NewUPPLogger(serviceName, *logLevel)
 		dbDriverLog := logger.NewUPPLogger(serviceName+"-cm-neo4j-driver", *dbDriverLogLevel)
 
 		log.WithField("args", os.Args).Info("Application started")
@@ -71,7 +71,10 @@ func main() {
 
 		runServer(*neoURL, *port, *cacheDuration, *apiYml, log, dbDriverLog)
 	}
-	app.Run(os.Args)
+	err := app.Run(os.Args)
+	if err != nil {
+		log.WithError(err).Fatal("Failed to start application")
+	}
 }
 
 func runServer(neoURL, port, cacheDuration, apiYml string, log, dbDriverLog *logger.UPPLogger) {
