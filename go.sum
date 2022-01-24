@@ -3,8 +3,8 @@ github.com/Financial-Times/api-endpoint v1.0.0/go.mod h1:QrJsxP8uEZIPJZon+qhc+zO
 github.com/Financial-Times/base-ft-rw-app-go/v2 v2.0.0-20211207113529-d0faaa432d5d/go.mod h1:Td0/3sUrq7H7yHf86jcpVQ0LUvt5NWRUrRVjxgYIkAk=
 github.com/Financial-Times/base-ft-rw-app-go/v2 v2.0.0/go.mod h1:Td0/3sUrq7H7yHf86jcpVQ0LUvt5NWRUrRVjxgYIkAk=
 github.com/Financial-Times/cm-neo4j-driver v0.0.1/go.mod h1:0q7rpnzwBxptooh2/cqd9xALfgNEgVF6JLEzw0ygIDQ=
-github.com/Financial-Times/cm-neo4j-driver v0.1.1 h1:rofDjk4/+DpetBHS+lEltJIodOE95J4uWwngbGS4VYQ=
-github.com/Financial-Times/cm-neo4j-driver v0.1.1/go.mod h1:0q7rpnzwBxptooh2/cqd9xALfgNEgVF6JLEzw0ygIDQ=
+github.com/Financial-Times/cm-neo4j-driver v1.0.0-rc1 h1:7nJ9UQN+fRcjjvRW1SWU/afcrjWG0Nmk4vysubxUxgs=
+github.com/Financial-Times/cm-neo4j-driver v1.0.0-rc1/go.mod h1:0q7rpnzwBxptooh2/cqd9xALfgNEgVF6JLEzw0ygIDQ=
 github.com/Financial-Times/content-collection-rw-neo4j v1.6.1 h1:WXNoiNtcgHelLS0QeVnJB/wWGkhNh2fgZIzd8WswgNU=
 github.com/Financial-Times/content-collection-rw-neo4j v1.6.1/go.mod h1:vFGubBgVpRNXKSyCX4BsOInXqla0zBLuT4dyZ7F4G/k=
 github.com/Financial-Times/content-rw-neo4j/v3 v3.5.1 h1:y35UrIcn4Mdi/Y1W0PhBFTHlh8uy9hIf//aRXTsPFuA=
