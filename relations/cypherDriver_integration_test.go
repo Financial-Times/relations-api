@@ -71,7 +71,8 @@ func TestFindContentRelations_StoryPackage_Ok(t *testing.T) {
 	writeContentCollection(t, driver, []payloadData{storyPackage}, "StoryPackage")
 	defer cleanDB(t, driver, allData)
 
-	cypherDriver := NewCypherDriver(driver)
+	cypherDriver, err := NewCypherDriver(driver, publicAPIURL)
+	assert.NoError(t, err)
 	actualRelations, found, err := cypherDriver.findContentRelations(leadContentSP.uuid)
 	assert.NoError(t, err, "Unexpected error for content %s", leadContentSP.uuid)
 	assert.True(t, found, "Found no relations for content %s", leadContentSP.uuid)
@@ -97,7 +98,8 @@ func TestFindContentRelations_ContentPackage_Ok(t *testing.T) {
 	writeContentCollection(t, driver, []payloadData{contentPackage}, "ContentPackage")
 	defer cleanDB(t, driver, allData)
 
-	cypherDriver := NewCypherDriver(driver)
+	cypherDriver, err := NewCypherDriver(driver, publicAPIURL)
+	assert.NoError(t, err)
 	actualRelations, found, err := cypherDriver.findContentRelations(leadContentCP.uuid)
 	assert.NoError(t, err, "Unexpected error for content %s", leadContentCP.uuid)
 	assert.True(t, found, "Found no relations for content %s", leadContentCP.uuid)
@@ -122,7 +124,8 @@ func TestFindContentRelations_Content_In_ContentPackage_Ok(t *testing.T) {
 	writeContentCollection(t, driver, []payloadData{contentPackage}, "ContentPackage")
 	defer cleanDB(t, driver, allData)
 
-	cypherDriver := NewCypherDriver(driver)
+	cypherDriver, err := NewCypherDriver(driver, publicAPIURL)
+	assert.NoError(t, err)
 	actualRelations, found, err := cypherDriver.findContentRelations(relatedContent1.uuid)
 	assert.NoError(t, err, "Unexpected error for content %s", relatedContent1.uuid)
 	assert.True(t, found, "Found no relations for content %s", relatedContent1.uuid)
@@ -146,7 +149,8 @@ func TestFindContentCollectionRelations_Ok(t *testing.T) {
 	writeContentCollection(t, driver, []payloadData{contentPackage}, "ContentPackage")
 	defer cleanDB(t, driver, allData)
 
-	cypherDriver := NewCypherDriver(driver)
+	cypherDriver, err := NewCypherDriver(driver, publicAPIURL)
+	assert.NoError(t, err)
 	actualRelations, found, err := cypherDriver.findContentCollectionRelations(contentPackage.uuid)
 	assert.NoError(t, err, "Unexpected error for content package %s", contentPackage.uuid)
 	assert.True(t, found, "Found no relations for content package %s", contentPackage.uuid)

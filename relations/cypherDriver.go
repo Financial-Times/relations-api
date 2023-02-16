@@ -3,6 +3,7 @@ package relations
 import (
 	"errors"
 	"fmt"
+	"net/url"
 
 	cmneo4j "github.com/Financial-Times/cm-neo4j-driver"
 )
@@ -14,11 +15,20 @@ type Driver interface {
 }
 
 type cypherDriver struct {
-	driver *cmneo4j.Driver
+	driver       *cmneo4j.Driver
+	publicAPIURL string
 }
 
-func NewCypherDriver(driver *cmneo4j.Driver) Driver {
-	return &cypherDriver{driver}
+func NewCypherDriver(driver *cmneo4j.Driver, publicAPIURL string) (Driver, error) {
+	_, err := url.ParseRequestURI(publicAPIURL)
+	if err != nil {
+		return nil, err
+	}
+
+	return &cypherDriver{
+		driver:       driver,
+		publicAPIURL: publicAPIURL,
+	}, nil
 }
 
 func (cd *cypherDriver) checkConnectivity() error {
@@ -76,9 +86,9 @@ func (cd *cypherDriver) findContentRelations(contentUUID string) (relations, boo
 
 	found := len(neoCRC.UUIDs) != 0 || len(neoCPContains.UUIDs) != 0 || len(neoCPContainedIn.UUIDs) != 0
 
-	mappedCRC := transformToRelatedContent(neoCRC.UUIDs)
-	mappedCPC := transformToRelatedContent(neoCPContains.UUIDs)
-	mappedCIC := transformToRelatedContent(neoCPContainedIn.UUIDs)
+	mappedCRC := transformToRelatedContent(neoCRC.UUIDs, cd.publicAPIURL)
+	mappedCPC := transformToRelatedContent(neoCPContains.UUIDs, cd.publicAPIURL)
+	mappedCIC := transformToRelatedContent(neoCPContainedIn.UUIDs, cd.publicAPIURL)
 	relations := relations{mappedCRC, mappedCPC, mappedCIC}
 
 	return relations, found, nil

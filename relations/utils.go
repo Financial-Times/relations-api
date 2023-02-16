@@ -1,13 +1,15 @@
 package relations
 
-import "github.com/Financial-Times/neo-model-utils-go/mapper"
+import (
+	"strings"
+)
 
-func transformToRelatedContent(uuids []string) []relatedContent {
+func transformToRelatedContent(uuids []string, publicAPIURL string) []relatedContent {
 	mappedRelatedContent := []relatedContent{}
 	for _, u := range uuids {
 		c := relatedContent{
-			APIURL: mapper.APIURL(u, []string{"Content"}, "local"),
-			ID:     mapper.IDURL(u),
+			APIURL: buildAPIURL(u, "content", publicAPIURL),
+			ID:     buildAPIURL(u, "things", publicAPIURL),
 		}
 		mappedRelatedContent = append(mappedRelatedContent, c)
 	}
@@ -29,4 +31,8 @@ func transformContainsToCCRelations(neoRelatedContent []neoRelatedContent) []str
 		contains = append(contains, neoContent.UUID)
 	}
 	return contains
+}
+
+func buildAPIURL(uuid, path, baseURL string) string {
+	return strings.TrimRight(baseURL, "/") + "/" + path + "/" + uuid
 }

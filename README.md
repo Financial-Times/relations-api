@@ -49,7 +49,8 @@ Options:
 --cache-duration        Duration Get requests should be cached for. e.g. 2h45m would set the max-age value to '9900' seconds (env $CACHE_DURATION) (default "30s")
 --api-yml               Location of the API Swagger YML file. (env $API_YML) (default "./api.yml")
 --log-level             Logging level (DEBUG, INFO, WARN, ERROR) (env $LOG_LEVEL) (default "INFO")
---db-driver-log-level   Db's driver log level (DEBUG, INFO, WARN, ERROR) (env $DB_DRIVER_LOG_LEVEL) (default "WARN")
+--db-driver-log-level   Db's driver log level (DEBUG, INFO, WARN, ERROR) (env $DB_DRIVER_LOG_LEVEL) (default "ERROR")
+--apiURL                API Gateway URL used when building the thing ID url in the response, in the format scheme://host (env $API_HOST)
 ```
 
 

@@ -40,6 +40,8 @@ spec:
             configMapKeyRef:
               name: global-config
               key: neo4j.read.write.bolt.url
+        - name: API_HOST
+          value: http://api.ft.com
         ports:
         - containerPort: 8080
         livenessProbe:

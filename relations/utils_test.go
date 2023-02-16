@@ -17,8 +17,10 @@ var expectedRelatedContent []relatedContent = []relatedContent{
 	{ID: "http://api.ft.com/things/f78c1482-abab-413e-b753-ca3ce3cb84f0", APIURL: "http://api.ft.com/content/f78c1482-abab-413e-b753-ca3ce3cb84f0"},
 }
 
+var publicAPIURL = "http://api.ft.com"
+
 func TestTransformToRelatedContentHappyFlow(t *testing.T) {
-	relatedContent := transformToRelatedContent(givenNeoRelatedContent)
+	relatedContent := transformToRelatedContent(givenNeoRelatedContent, publicAPIURL)
 
 	expected, _ := json.Marshal(expectedRelatedContent)
 	actual, _ := json.Marshal(relatedContent)
@@ -29,7 +31,7 @@ func TestTransformToRelatedContentNoRelations(t *testing.T) {
 	givenNeoRelatedContent := []string{}
 	expectedRelatedContent := []string{}
 
-	relatedContent := transformToRelatedContent(givenNeoRelatedContent)
+	relatedContent := transformToRelatedContent(givenNeoRelatedContent, publicAPIURL)
 
 	expected, _ := json.Marshal(expectedRelatedContent)
 	actual, _ := json.Marshal(relatedContent)
