@@ -4,12 +4,14 @@ import (
 	"strings"
 )
 
+const thingURL = "http://api.ft.com/things/"
+
 func transformToRelatedContent(uuids []string, publicAPIURL string) []relatedContent {
 	mappedRelatedContent := []relatedContent{}
 	for _, u := range uuids {
 		c := relatedContent{
-			APIURL: buildAPIURL(u, "content", publicAPIURL),
-			ID:     buildAPIURL(u, "things", publicAPIURL),
+			APIURL: apiURL(u, publicAPIURL),
+			ID:     thingIDURL(u),
 		}
 		mappedRelatedContent = append(mappedRelatedContent, c)
 	}
@@ -33,6 +35,10 @@ func transformContainsToCCRelations(neoRelatedContent []neoRelatedContent) []str
 	return contains
 }
 
-func buildAPIURL(uuid, path, baseURL string) string {
-	return strings.TrimRight(baseURL, "/") + "/" + path + "/" + uuid
+func thingIDURL(uuid string) string {
+	return thingURL + uuid
+}
+
+func apiURL(uuid, baseURL string) string {
+	return strings.TrimRight(baseURL, "/") + "/content/" + uuid
 }
