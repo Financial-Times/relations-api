@@ -2,6 +2,10 @@
 
 This service retrieves all the relations for a content by its uuid querying a neo4j instance.
 
+## Code
+
+upp-relations-api
+
 ## Primary URL
 
 <https://upp-prod-delivery-glb.upp.ft.com/__relations_api/>

@@ -61,6 +61,11 @@ func main() {
 		Desc:   "Db's driver log level (DEBUG, INFO, WARN, ERROR)",
 		EnvVar: "DB_DRIVER_LOG_LEVEL",
 	})
+	publicAPIURL := app.String(cli.StringOpt{
+		Name:   "apiURL",
+		Desc:   "API Gateway URL used when building the thing ID url in the response, in the format scheme://host",
+		EnvVar: "API_HOST",
+	})
 
 	log := logger.NewUPPLogger(serviceName, *logLevel)
 	app.Action = func() {
@@ -69,7 +74,7 @@ func main() {
 		log.WithField("args", os.Args).Info("Application started")
 		log.Infof("relations-api will listen on port: %s, connecting to: %s", *port, *neoURL)
 
-		runServer(*neoURL, *port, *cacheDuration, *apiYml, log, dbDriverLog)
+		runServer(*neoURL, *port, *cacheDuration, *apiYml, *publicAPIURL, log, dbDriverLog)
 	}
 	err := app.Run(os.Args)
 	if err != nil {
@@ -77,7 +82,7 @@ func main() {
 	}
 }
 
-func runServer(neoURL, port, cacheDuration, apiYml string, log, dbDriverLog *logger.UPPLogger) {
+func runServer(neoURL, port, cacheDuration, apiYml, publicAPIURL string, log, dbDriverLog *logger.UPPLogger) {
 	var cacheControlHeader string
 	if duration, durationErr := time.ParseDuration(cacheDuration); durationErr != nil {
 		log.WithError(durationErr).Fatal("Failed to parse cache duration string")
@@ -90,7 +95,12 @@ func runServer(neoURL, port, cacheDuration, apiYml string, log, dbDriverLog *log
 		log.WithError(err).Fatal("Failed to create new cmneo4j driver")
 	}
 
-	httpHandlers := relations.NewHttpHandlers(relations.NewCypherDriver(driver), cacheControlHeader)
+	cypherDriver, err := relations.NewCypherDriver(driver, publicAPIURL)
+	if err != nil {
+		log.WithError(err).Fatalf("Failed to create new cypher driver")
+	}
+
+	httpHandlers := relations.NewHttpHandlers(cypherDriver, cacheControlHeader)
 	// The following endpoints should not be monitored or logged (varnish calls one of these every second, depending on config)
 	// The top one of these build info endpoints feels more correct, but the lower one matches what we have in Dropwizard,
 	// so it's what apps expect currently same as ping, the content of build-info needs more definition
