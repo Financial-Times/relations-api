@@ -4,3 +4,14 @@ service:
   name: relations-api
 env:
   app_port: "8080"
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+    - labelSelector:
+        matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - enriched-content-read-api
+      topologyKey: "kubernetes.io/hostname"
