@@ -1,6 +1,6 @@
 module github.com/Financial-Times/relations-api/v3
 
-go 1.17
+go 1.22
 
 require (
 	github.com/Financial-Times/api-endpoint v1.0.0
